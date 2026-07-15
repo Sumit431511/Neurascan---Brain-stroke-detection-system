@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuraScan — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f0faf8;--surface:#fff;--border:#c8e8e3;--border2:#9dd4cc;
+      --teal:#0a7566;--teal-light:#14b89f;--teal-pale:#e0f5f2;--teal-glow:rgba(10,117,102,.15);
+      --red:#c0392b;--red-pale:#fef1f0;
+      --text:#0a1f1c;--text-muted:#5a8a84;--text-faint:#9abfbb;
+      --font-display:'Playfair Display',Georgia,serif;
+      --font-body:'Inter',system-ui,sans-serif;
+      --r:10px;--r-lg:16px;--r-xl:22px;
+      --sh-lg:0 20px 60px rgba(10,117,102,.15);
+    }
+    [data-theme="dark"]{
+      --bg:#061412;--surface:#0b1e1b;--border:#163630;--border2:#1f4a42;
+      --teal:#2dd4bf;--teal-light:#5eead4;--teal-pale:#0a2220;--teal-glow:rgba(45,212,191,.15);
+      --red:#f87171;--red-pale:#1c0808;
+      --text:#d4eeeb;--text-muted:#5a9991;--text-faint:#2a5550;
+      --sh-lg:0 20px 60px rgba(0,0,0,.5);
+    }
+
+    html,body{height:100%}
+    body{
+      background:var(--bg);color:var(--text);
+      font-family:var(--font-body);font-size:15px;
+      display:grid;place-items:center;min-height:100vh;
+      transition:background .3s,color .3s;
+    }
+    body::before{
+      content:'';position:fixed;inset:0;pointer-events:none;
+      background:
+        radial-gradient(ellipse 70% 60% at 10% 10%,rgba(10,117,102,.08) 0%,transparent 55%),
+        radial-gradient(ellipse 50% 60% at 90% 90%,rgba(10,117,102,.06) 0%,transparent 55%);
+    }
+
+    /* Theme toggle */
+    .theme-btn{
+      position:fixed;top:20px;right:20px;
+      width:36px;height:36px;
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:9px;cursor:pointer;
+      display:grid;place-items:center;font-size:16px;
+      transition:all .2s;z-index:10;
+    }
+    .theme-btn:hover{background:var(--teal-pale);border-color:var(--teal)}
+
+    /* Card */
+    .card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--r-xl);
+      box-shadow:var(--sh-lg);
+      width:100%;max-width:440px;
+      overflow:hidden;
+      position:relative;z-index:1;
+      animation:slideUp .5s ease both;
+    }
+    @keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+    /* Card header */
+    .card-top{
+      padding:32px 36px 24px;
+      background:linear-gradient(135deg,var(--teal-pale),transparent);
+      border-bottom:1px solid var(--border);
+      text-align:center;
+    }
+    .logo-wrap{
+      width:56px;height:56px;
+      background:linear-gradient(135deg,var(--teal),var(--teal-light));
+      border-radius:14px;margin:0 auto 16px;
+      display:grid;place-items:center;font-size:26px;
+      box-shadow:0 6px 20px var(--teal-glow);
+    }
+    .card-title{
+      font-family:var(--font-display);
+      font-size:24px;letter-spacing:-.3px;
+      color:var(--text);margin-bottom:4px;
+    }
+    .card-title span{color:var(--teal)}
+    .card-sub{font-size:13px;color:var(--text-muted)}
+
+    /* Tabs */
+    .tabs{
+      display:grid;grid-template-columns:1fr 1fr;
+      border-bottom:1px solid var(--border);
+    }
+    .tab-btn{
+      padding:14px;text-align:center;
+      font-size:14px;font-weight:600;
+      color:var(--text-muted);cursor:pointer;
+      border:none;background:none;
+      font-family:var(--font-body);
+      border-bottom:2px solid transparent;
+      transition:all .15s;
+    }
+    .tab-btn.active{
+      color:var(--teal);
+      border-bottom-color:var(--teal);
+      background:var(--teal-pale);
+    }
+    .tab-btn:hover:not(.active){background:var(--teal-pale);color:var(--text)}
+
+    /* Form */
+    .form-wrap{padding:28px 36px 32px}
+    .form-panel{display:none}
+    .form-panel.active{display:block;animation:fadeIn .25s ease both}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+    .field{margin-bottom:16px}
+    .field-label{
+      display:block;font-size:11px;font-weight:600;
+      letter-spacing:1.2px;text-transform:uppercase;
+      color:var(--text-muted);margin-bottom:6px;
+    }
+    .field-input{
+      width:100%;padding:11px 14px;
+      background:var(--bg);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      font-size:14px;color:var(--text);
+      font-family:var(--font-body);
+      outline:none;transition:border-color .15s,box-shadow .15s;
+    }
+    .field-input:focus{
+      border-color:var(--teal);
+      box-shadow:0 0 0 3px var(--teal-glow);
+    }
+    .field-input::placeholder{color:var(--text-faint)}
+
+    /* Submit button */
+    .btn-submit{
+      width:100%;padding:13px;margin-top:8px;
+      background:linear-gradient(135deg,var(--teal),var(--teal-light));
+      border:none;border-radius:var(--r-lg);
+      color:#fff;font-size:15px;font-weight:600;
+      font-family:var(--font-body);cursor:pointer;
+      box-shadow:0 4px 16px var(--teal-glow);
+      transition:all .2s;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+    }
+    .btn-submit:hover:not(:disabled){
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px var(--teal-glow);
+    }
+    .btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:rot .7s linear infinite;display:none}
+    .btn-submit.loading .spin{display:block}
+    .btn-submit.loading .btn-txt{display:none}
+    @keyframes rot{to{transform:rotate(360deg)}}
+
+    /* Error / Success */
+    .msg{
+      display:none;padding:11px 14px;border-radius:var(--r);
+      font-size:13px;margin-bottom:14px;
+      align-items:center;gap:8px;
+    }
+    .msg.error{background:var(--red-pale);color:var(--red);border:1px solid rgba(192,57,43,.2)}
+    .msg.success{background:var(--teal-pale);color:var(--teal);border:1px solid var(--border2)}
+    .msg.show{display:flex}
+
+    .divider{
+      text-align:center;margin:16px 0;
+      font-size:12px;color:var(--text-faint);
+      position:relative;
+    }
+    .divider::before,.divider::after{
+      content:'';position:absolute;top:50%;
+      width:42%;height:1px;background:var(--border);
+    }
+    .divider::before{left:0}.divider::after{right:0}
+
+    .footer-note{
+      text-align:center;margin-top:18px;
+      font-size:12px;color:var(--text-muted);
+      padding-top:16px;border-top:1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <button class="theme-btn" id="themeBtn">🌙</button>
+
+  <div class="card">
+    <!-- Header -->
+    <div class="card-top">
+      <div class="logo-wrap">🧠</div>
+      <div class="card-title">Neura<span>Scan</span></div>
+      <div class="card-sub">AI Brain Stroke Detection · Doctor Portal</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+      <button class="tab-btn" id="tabReg" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- Forms -->
+    <div class="form-wrap">
+
+      <!-- LOGIN FORM -->
+      <div class="form-panel active" id="panelLogin">
+        <div class="msg error" id="loginErr">⚠ <span id="loginErrMsg"></span></div>
+        <div class="field">
+          <label class="field-label">Email Address</label>
+          <input class="field-input" id="loginEmail" type="email" placeholder="doctor@hospital.com" />
+        </div>
+        <div class="field">
+          <label class="field-label">Password</label>
+          <input class="field-input" id="loginPass" type="password" placeholder="Your password" />
+        </div>
+        <button class="btn-submit" id="btnLogin" onclick="doLogin()">
+          <div class="spin"></div>
+          <span class="btn-txt">Sign In →</span>
+        </button>
+        <div class="footer-note">
+          Don't have an account? <a href="#" style="color:var(--teal);font-weight:600" onclick="switchTab('register')">Register here</a>
+        </div>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div class="form-panel" id="panelReg">
+        <div class="msg error" id="regErr">⚠ <span id="regErrMsg"></span></div>
+        <div class="msg success" id="regSuccess">✓ <span>Account created! Redirecting…</span></div>
+        <div class="field">
+          <label class="field-label">Full Name</label>
+          <input class="field-input" id="regName" type="text" placeholder="Dr. Rahul Sharma" />
+        </div>
+        <div class="field">
+          <label class="field-label">Email Address</label>
+          <input class="field-input" id="regEmail" type="email" placeholder="doctor@hospital.com" />
+        </div>
+        <div class="field">
+          <label class="field-label">Password (min 6 characters)</label>
+          <input class="field-input" id="regPass" type="password" placeholder="Create a password" />
+        </div>
+        <div class="field">
+          <label class="field-label">Confirm Password</label>
+          <input class="field-input" id="regPassConfirm" type="password" placeholder="Repeat password" />
+        </div>
+        <button class="btn-submit" id="btnReg" onclick="doRegister()">
+          <div class="spin"></div>
+          <span class="btn-txt">Create Account →</span>
+        </button>
+        <div class="footer-note">
+          Already have an account? <a href="#" style="color:var(--teal);font-weight:600" onclick="switchTab('login')">Sign in</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:8000';
+
+    // ── Theme ──────────────────────────────────────────────────────────────
+    const themeBtn = document.getElementById('themeBtn');
+    if (localStorage.getItem('ns-theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      themeBtn.textContent = '☀️';
+    }
+    themeBtn.addEventListener('click', () => {
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement[dark ? 'removeAttribute' : 'setAttribute']('data-theme', 'dark');
+      themeBtn.textContent = dark ? '🌙' : '☀️';
+      localStorage.setItem('ns-theme', dark ? 'light' : 'dark');
+    });
+
+    // ── If already logged in, redirect ────────────────────────────────────
+    if (localStorage.getItem('ns-token')) {
+      window.location.href = 'index.html';
+    }
+
+    // ── Tab switching ──────────────────────────────────────────────────────
+    function switchTab(tab) {
+      document.getElementById('panelLogin').classList.toggle('active', tab === 'login');
+      document.getElementById('panelReg').classList.toggle('active',   tab === 'register');
+      document.getElementById('tabLogin').classList.toggle('active',   tab === 'login');
+      document.getElementById('tabReg').classList.toggle('active',     tab === 'register');
+      hideAll();
+    }
+
+    function hideAll() {
+      ['loginErr','regErr','regSuccess'].forEach(id => {
+        document.getElementById(id).classList.remove('show');
+      });
+    }
+
+    function showErr(id, msg) {
+      const el = document.getElementById(id);
+      el.querySelector('span').textContent = msg;
+      el.classList.add('show');
+    }
+
+    // ── Login ──────────────────────────────────────────────────────────────
+    async function doLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass  = document.getElementById('loginPass').value;
+      if (!email || !pass) { showErr('loginErr', 'Please enter email and password.'); return; }
+
+      const btn = document.getElementById('btnLogin');
+      btn.classList.add('loading'); btn.disabled = true;
+      hideAll();
+
+      try {
+        const res  = await fetch(`${API}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password: pass }),
+        });
+        const data = await res.json();
+        if (!res.ok) { showErr('loginErr', data.detail || 'Login failed.'); return; }
+
+        // Save token + doctor info
+        localStorage.setItem('ns-token',  data.access_token);
+        localStorage.setItem('ns-doctor', data.doctor_name);
+        localStorage.setItem('ns-email',  data.doctor_email);
+
+        // Redirect to main app
+        window.location.href = 'index.html';
+
+      } catch (e) {
+        showErr('loginErr', `Cannot reach API at ${API}. Is FastAPI running?`);
+      } finally {
+        btn.classList.remove('loading'); btn.disabled = false;
+      }
+    }
+
+    // ── Register ───────────────────────────────────────────────────────────
+    async function doRegister() {
+      const name  = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const pass  = document.getElementById('regPass').value;
+      const conf  = document.getElementById('regPassConfirm').value;
+
+      if (!name || !email || !pass) { showErr('regErr', 'Please fill all fields.'); return; }
+      if (pass.length < 6) { showErr('regErr', 'Password must be at least 6 characters.'); return; }
+      if (pass !== conf)   { showErr('regErr', 'Passwords do not match.'); return; }
+
+      const btn = document.getElementById('btnReg');
+      btn.classList.add('loading'); btn.disabled = true;
+      hideAll();
+
+      try {
+        const res  = await fetch(`${API}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password: pass }),
+        });
+        const data = await res.json();
+        if (!res.ok) { showErr('regErr', data.detail || 'Registration failed.'); return; }
+
+        // Save token
+        localStorage.setItem('ns-token',  data.access_token);
+        localStorage.setItem('ns-doctor', data.doctor_name);
+        localStorage.setItem('ns-email',  data.doctor_email);
+
+        document.getElementById('regSuccess').classList.add('show');
+        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+
+      } catch (e) {
+        showErr('regErr', `Cannot reach API at ${API}. Is FastAPI running?`);
+      } finally {
+        btn.classList.remove('loading'); btn.disabled = false;
+      }
+    }
+
+    // Allow Enter key to submit
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const active = document.querySelector('.form-panel.active').id;
+        if (active === 'panelLogin') doLogin();
+        else doRegister();
+      }
+    });
+  </script>
+</body>
+</html>

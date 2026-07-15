@@ -1,0 +1,43 @@
+﻿# NeuraScan Backend Dependencies — v5.0.0
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+python-multipart==0.0.9
+
+# Database
+sqlalchemy==2.0.30
+
+# Authentication
+python-jose[cryptography]==3.3.0   # JWT tokens
+passlib[bcrypt]==1.7.4              # Password hashing
+
+# Deep learning
+tensorflow==2.15.0
+tf-keras
+
+# Image processing
+Pillow==10.3.0
+numpy==1.26.4
+matplotlib
+
+# PDF generation
+reportlab
+
+# --- ADD THESE FOR PRODUCTION ---
+
+# Modern Gemini SDK (replaces google-generativeai)
+google-genai
+
+# Configuration & Security
+pydantic-settings
+python-dotenv
+
+# Database Migrations
+alembic
+
+# Production Server Stack
+gunicorn
+uvloop; sys_platform != 'win32'
+httptools
+
+# Image Processing Add-on (Faster resizing for CT scans)
+opencv-python-headless

@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuraScan — AI Brain Stroke Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#f0faf8;--surface:#fff;--surface2:#f5fdfc;--border:#c8e8e3;--border2:#9dd4cc;
+      --teal:#0a7566;--teal-mid:#0d9882;--teal-light:#14b89f;--teal-pale:#e0f5f2;--teal-glow:rgba(10,117,102,.12);
+      --red:#c0392b;--red-pale:#fef1f0;--red-glow:rgba(192,57,43,.1);
+      --green:#1a7a42;--green-pale:#edf8f2;--green-glow:rgba(26,122,66,.1);
+      --amber:#b45309;--amber-pale:#fffbeb;
+      --text:#0a1f1c;--text-sub:#2d5a54;--text-muted:#5a8a84;--text-faint:#9abfbb;
+      --font-display:'Playfair Display',Georgia,serif;--font-body:'Inter',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace;
+      --r:10px;--r-lg:16px;--r-xl:24px;
+      --sh-sm:0 1px 4px rgba(10,117,102,.08),0 0 0 1px rgba(10,117,102,.04);
+      --sh-md:0 4px 20px rgba(10,117,102,.10),0 0 0 1px rgba(10,117,102,.05);
+      --sh-lg:0 12px 40px rgba(10,117,102,.12),0 0 0 1px rgba(10,117,102,.06);
+    }
+    [data-theme="dark"]{
+      --bg:#061412;--surface:#0b1e1b;--surface2:#0e2421;--border:#163630;--border2:#1f4a42;
+      --teal:#2dd4bf;--teal-mid:#22c4ac;--teal-light:#5eead4;--teal-pale:#0a2220;--teal-glow:rgba(45,212,191,.12);
+      --red:#f87171;--red-pale:#1c0808;--red-glow:rgba(248,113,113,.1);
+      --green:#4ade80;--green-pale:#071a0e;--green-glow:rgba(74,222,128,.1);
+      --amber:#fbbf24;--amber-pale:#160e00;
+      --text:#d4eeeb;--text-sub:#8eccc6;--text-muted:#5a9991;--text-faint:#2a5550;
+      --sh-sm:0 1px 4px rgba(0,0,0,.5);--sh-md:0 4px 20px rgba(0,0,0,.4);--sh-lg:0 12px 40px rgba(0,0,0,.5);
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.65;transition:background .3s,color .3s;min-height:100vh}
+    body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 70% 50% at 0% 0%,rgba(10,117,102,.07) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 100% 100%,rgba(10,117,102,.05) 0%,transparent 55%)}
+    [data-theme="dark"] body::before{background:radial-gradient(ellipse 70% 50% at 0% 0%,rgba(45,212,191,.06) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 100% 100%,rgba(45,212,191,.04) 0%,transparent 55%)}
+    nav{position:sticky;top:0;z-index:200;background:rgba(240,250,248,.85);backdrop-filter:blur(20px) saturate(1.8);border-bottom:1px solid var(--border);transition:background .3s,border-color .3s}
+    [data-theme="dark"] nav{background:rgba(6,20,18,.88)}
+    .nav-inner{max-width:1160px;margin:0 auto;padding:0 32px;display:flex;align-items:center;height:64px;gap:8px}
+    .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:32px;flex-shrink:0}
+    .nav-logo{width:36px;height:36px;background:linear-gradient(135deg,var(--teal),var(--teal-light));border-radius:9px;display:grid;place-items:center;font-size:18px;box-shadow:0 4px 12px var(--teal-glow)}
+    .nav-name{font-family:var(--font-display);font-size:18px;color:var(--text);letter-spacing:-.3px}
+    .nav-name span{color:var(--teal)}
+    .nav-tabs{display:flex;gap:2px;flex:1}
+    .nav-tab{padding:7px 16px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text-muted);border:none;background:none;cursor:pointer;font-family:var(--font-body);transition:all .18s;position:relative;text-decoration:none;display:inline-flex;align-items:center}
+    .nav-tab:hover{color:var(--text);background:var(--teal-pale)}
+    .nav-tab.active{color:var(--teal);background:var(--teal-pale);font-weight:600}
+    .nav-tab.active::after{content:'';position:absolute;bottom:-1px;left:16px;right:16px;height:2px;background:var(--teal);border-radius:2px}
+    .nav-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+    .btn-theme{width:36px;height:36px;background:var(--surface);border:1px solid var(--border);border-radius:8px;cursor:pointer;display:grid;place-items:center;font-size:16px;transition:all .2s;color:var(--text-muted)}
+    .btn-theme:hover{background:var(--teal-pale);border-color:var(--teal)}
+    .btn-signout{padding:6px 12px;background:none;border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text-muted);cursor:pointer;font-family:var(--font-body);transition:all .15s}
+    .btn-signout:hover{border-color:var(--red);color:var(--red)}
+    .page{display:none;position:relative;z-index:1}
+    .page.active{display:block}
+    .wrap{max-width:1160px;margin:0 auto;padding:56px 32px 100px}
+    .hero-block{margin-bottom:48px}
+    .hero-tag{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;background:var(--teal-pale);border:1px solid var(--border2);border-radius:50px;font-size:11px;font-weight:600;letter-spacing:2px;color:var(--teal);text-transform:uppercase;margin-bottom:18px}
+    .hero-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--teal)}
+    h1.hero-title{font-family:var(--font-display);font-size:clamp(30px,4vw,48px);line-height:1.15;letter-spacing:-1px;color:var(--text);margin-bottom:16px}
+    h1.hero-title em{color:var(--teal);font-style:normal}
+    .hero-desc{font-size:16px;color:var(--text-muted);max-width:560px;line-height:1.75}
+    .scan-grid{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
+    .glass-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--sh-md);overflow:hidden;transition:background .3s,border-color .3s}
+    .card-top{padding:22px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;background:linear-gradient(90deg,var(--teal-pale),transparent)}
+    .card-top-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--teal),var(--teal-light));border-radius:10px;display:grid;place-items:center;font-size:18px;box-shadow:0 4px 12px var(--teal-glow)}
+    .card-top-title{font-family:var(--font-display);font-size:17px;color:var(--text)}
+    .card-top-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+    .card-body{padding:28px}
+    .drop-zone{border:2px dashed var(--border2);border-radius:var(--r-lg);padding:52px 24px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--surface2)}
+    .drop-zone:hover,.drop-zone.over{border-color:var(--teal);background:var(--teal-pale);transform:scale(1.004)}
+    .drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .drop-icon{width:68px;height:68px;margin:0 auto 20px;background:linear-gradient(135deg,var(--teal-pale),var(--surface));border:1px solid var(--border2);border-radius:16px;display:grid;place-items:center;font-size:30px;box-shadow:var(--sh-sm);transition:transform .2s}
+    .drop-zone:hover .drop-icon{transform:translateY(-4px) scale(1.05)}
+    .drop-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px}
+    .drop-sub{font-size:13px;color:var(--text-muted)}
+    .drop-sub a{color:var(--teal);font-weight:600;text-decoration:none}
+    .fmt-row{display:flex;justify-content:center;gap:6px;margin-top:18px;flex-wrap:wrap}
+    .fmt-chip{padding:3px 10px;background:var(--surface);border:1px solid var(--border);border-radius:4px;font-size:11px;font-family:var(--font-mono);color:var(--text-faint)}
+    .preview-box{display:none;margin-top:16px;padding:16px;gap:16px;align-items:flex-start;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);animation:fadeUp .3s ease both}
+    .preview-box.show{display:flex}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .preview-img{width:96px;height:96px;flex-shrink:0;border-radius:var(--r);overflow:hidden;border:1px solid var(--border2);position:relative}
+    .preview-img img{width:100%;height:100%;object-fit:cover}
+    .preview-info{flex:1;min-width:0}
+    .preview-fname{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+    .preview-fmeta{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:10px}
+    .checks{display:flex;flex-direction:column;gap:4px}
+    .chk{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:7px}
+    .chk-icon{color:var(--teal);font-weight:700;font-size:13px}
+    .btn-rm{margin-top:10px;padding:4px 10px;background:none;border:1px solid var(--border);border-radius:6px;font-size:11px;color:var(--text-muted);cursor:pointer;font-family:var(--font-body);transition:all .15s}
+    .btn-rm:hover{border-color:var(--red);color:var(--red)}
+    .warn-strip{margin-top:16px;padding:12px 16px;background:var(--amber-pale);border:1px solid rgba(180,83,9,.2);border-left:3px solid var(--amber);border-radius:var(--r);font-size:12px;color:var(--amber);display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+    .btn-scan{margin-top:20px;width:100%;padding:15px 24px;background:linear-gradient(135deg,var(--teal),var(--teal-light));border:none;border-radius:var(--r-lg);color:white;font-size:15px;font-weight:600;font-family:var(--font-body);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px var(--teal-glow);transition:all .2s}
+    .btn-scan:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px var(--teal-glow)}
+    .btn-scan:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:rot .7s linear infinite;display:none}
+    .btn-scan.loading .spin{display:block}
+    .btn-scan.loading .btn-txt{display:none}
+    @keyframes rot{to{transform:rotate(360deg)}}
+    .err-box{display:none;margin-top:14px;padding:12px 16px;background:var(--red-pale);border:1px solid rgba(192,57,43,.2);border-left:3px solid var(--red);border-radius:var(--r);font-size:13px;color:var(--red);gap:8px;align-items:flex-start}
+    .err-box.show{display:flex;animation:fadeUp .3s ease both}
+    
+    /* Result Card */
+    .res-card{display:none;margin-top:20px;border-radius:var(--r-xl);border:1px solid var(--border);overflow:hidden;box-shadow:var(--sh-lg);animation:fadeUp .4s ease both}
+    .res-card.show{display:block}
+    .res-card.stroke{border-color:rgba(192,57,43,.3);box-shadow:0 12px 40px var(--red-glow)}
+    .res-card.normal{border-color:rgba(26,122,66,.3);box-shadow:0 12px 40px var(--green-glow)}
+    .res-header{padding:22px 26px;display:flex;align-items:center;gap:16px}
+    .res-card.stroke .res-header{background:linear-gradient(135deg,var(--red-pale),transparent)}
+    .res-card.normal .res-header{background:linear-gradient(135deg,var(--green-pale),transparent)}
+    .res-ico{width:52px;height:52px;flex-shrink:0;border-radius:12px;display:grid;place-items:center;font-size:24px}
+    .res-card.stroke .res-ico{background:rgba(192,57,43,.12);border:1px solid rgba(192,57,43,.2)}
+    .res-card.normal .res-ico{background:rgba(26,122,66,.12);border:1px solid rgba(26,122,66,.2)}
+    .res-verdict{font-family:var(--font-display);font-size:22px;letter-spacing:-.3px}
+    .res-card.stroke .res-verdict{color:var(--red)}
+    .res-card.normal .res-verdict{color:var(--green)}
+    .res-sub{font-size:12px;color:var(--text-muted);margin-top:4px}
+    .res-badge{margin-left:auto;padding:5px 14px;border-radius:50px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+    .res-card.stroke .res-badge{background:rgba(192,57,43,.1);color:var(--red);border:1px solid rgba(192,57,43,.2)}
+    .res-card.normal .res-badge{background:rgba(26,122,66,.1);color:var(--green);border:1px solid rgba(26,122,66,.2)}
+    
+    /* 4-COLUMN METRICS (Restored 3-Class Layout) */
+    .res-metrics{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border)}
+    .m-cell{padding:18px 20px;text-align:center;border-right:1px solid var(--border)}
+    .m-cell:last-child{border-right:none}
+    .m-val{font-family:var(--font-mono);font-size:24px;font-weight:500;display:block;margin-bottom:4px}
+    .m-lbl{font-size:10px;color:var(--text-faint);letter-spacing:1.5px;text-transform:uppercase}
+    
+    /* 3 BARS (Restored) */
+    .res-bars{padding:16px 22px;border-top:1px solid var(--border)}
+    .b-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .b-row:last-child{margin-bottom:0}
+    .b-lbl{font-size:12px;color:var(--text-muted);width:80px;flex-shrink:0}
+    .b-track{flex:1;height:7px;background:var(--surface2);border-radius:50px;overflow:hidden;border:1px solid var(--border)}
+    .b-fill{height:100%;border-radius:50px;transition:width 1.1s cubic-bezier(.34,1.4,.64,1) .1s;width:0}
+    .b-fill.s{background:linear-gradient(90deg,#e07070,var(--red))}
+    .b-fill.n{background:linear-gradient(90deg,#60c890,var(--green))}
+    .b-pct{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);width:40px;text-align:right}
+    
+    .stroke-warn{display:none;padding:14px 22px;background:var(--red-pale);border-top:1px solid rgba(192,57,43,.15);font-size:13px;color:var(--red);line-height:1.6}
+    .res-card.stroke .stroke-warn{display:block}
+    
+    /* Heatmap */
+    .heatmap-section{display:none;border-top:1px solid var(--border);padding:20px 22px;background:var(--surface2)}
+    .heatmap-section.show{display:block;animation:fadeUp .4s ease both}
+    .heatmap-title{font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal);display:flex;align-items:center;gap:8px;margin-bottom:14px}
+    .heatmap-title::before{content:'';width:16px;height:2px;background:var(--teal);border-radius:2px}
+    .heatmap-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .heatmap-img-wrap{border-radius:var(--r);overflow:hidden;border:1px solid var(--border2);position:relative}
+    .heatmap-img-wrap img{width:100%;height:auto;display:block}
+    .heatmap-img-label{position:absolute;bottom:0;left:0;right:0;padding:6px 10px;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);font-size:11px;color:white;font-family:var(--font-mono)}
+    .heatmap-legend{margin-top:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);font-size:12px;color:var(--text-muted);line-height:1.6;display:flex;align-items:flex-start;gap:8px}
+    .heatmap-legend-bar{height:8px;border-radius:4px;margin-top:10px;background:linear-gradient(90deg,#000080,#0000ff,#00ffff,#ffff00,#ff8000,#ff0000)}
+    .heatmap-legend-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text-faint);font-family:var(--font-mono);margin-top:4px}
+    
+    /* LLM Insights Section */
+    .llm-insights-section { display: none; border-top: 1px solid var(--border); padding: 20px 22px; background: var(--surface); }
+    .llm-insights-section.show { display: block; animation: fadeUp .4s ease both; }
+    .llm-content { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .llm-content ul { margin-left: 20px; margin-top: 8px; margin-bottom: 12px; }
+    .llm-content li { margin-bottom: 6px; }
+    .llm-content strong { color: var(--text); }
+    .llm-content p { margin-bottom: 10px; }
+
+    /* PDF Section */
+    .pdf-section{display:none;padding:16px 22px;border-top:1px solid var(--border);background:var(--surface2);align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    
+    /* Sidebar */
+    .sidebar{display:flex;flex-direction:column;gap:20px}
+    .s-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--sh-sm);transition:background .3s,border-color .3s}
+    .s-card-head{padding:14px 20px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--teal);display:flex;align-items:center;gap:8px;background:var(--teal-pale)}
+    .s-card-body{padding:18px 20px}
+    .spec-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
+    .spec-row:last-child{border-bottom:none}
+    .spec-k{font-size:12px;color:var(--text-muted)}
+    .spec-v{font-size:12px;font-family:var(--font-mono);color:var(--teal);font-weight:500}
+    .steps{display:flex;flex-direction:column;gap:12px}
+    .step{display:flex;gap:12px;align-items:flex-start;font-size:13px;color:var(--text-muted);line-height:1.5}
+    .step-n{width:24px;height:24px;flex-shrink:0;background:linear-gradient(135deg,var(--teal),var(--teal-light));color:white;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;margin-top:1px;box-shadow:0 2px 6px var(--teal-glow)}
+    .guard-list{display:flex;flex-direction:column;gap:9px}
+    .guard{display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--text-muted);line-height:1.5}
+    .guard-ico{color:var(--teal);flex-shrink:0;font-size:13px;margin-top:1px}
+    
+    /* Form & UI */
+    .patient-form{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 22px;margin-bottom:20px}
+    .patient-form-title{font-size:13px;font-weight:600;color:var(--teal);display:flex;align-items:center;gap:8px;margin-bottom:16px}
+    .patient-form-title::before{content:'';width:14px;height:2px;background:var(--teal);border-radius:2px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .form-row.single{grid-template-columns:1fr}
+    .form-group{display:flex;flex-direction:column;gap:5px}
+    .form-label{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase}
+    .form-input,.form-select{padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);font-size:14px;color:var(--text);font-family:var(--font-body);transition:border-color .15s;outline:none}
+    .form-input:focus,.form-select:focus{border-color:var(--teal)}
+    .form-input::placeholder{color:var(--text-faint)}
+    .patient-saved{display:none;margin-top:10px;padding:10px 14px;background:var(--green-pale);border:1px solid rgba(26,122,66,.2);border-radius:var(--r);font-size:12px;color:var(--green);align-items:center;gap:8px}
+    .patient-saved.show{display:flex}
+    .btn-register{width:100%;padding:10px;background:var(--teal-pale);border:1px solid var(--border2);border-radius:var(--r);font-size:13px;font-weight:600;color:var(--teal);cursor:pointer;font-family:var(--font-body);transition:all .15s}
+    .btn-register:hover{background:var(--teal);color:white}
+    .autocomplete-wrap { position: relative; }
+    .autocomplete-list {
+      position: absolute; top: 100%; left: 0; right: 0; z-index: 100;
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: var(--r); box-shadow: var(--sh-md);
+      max-height: 200px; overflow-y: auto; display: none;
+    }
+    .autocomplete-list.show { display: block; }
+    .ac-item {
+      padding: 10px 14px; cursor: pointer;
+      font-size: 13px; color: var(--text);
+      border-bottom: 1px solid var(--border);
+      transition: background .12s;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .ac-item:last-child { border-bottom: none; }
+    .ac-item:hover { background: var(--teal-pale); color: var(--teal); }
+    .ac-item-id { font-size: 11px; color: var(--text-faint); font-family: var(--font-mono); }
+    .ac-new {
+      padding: 10px 14px; cursor: pointer;
+      font-size: 12px; color: var(--teal); font-weight: 600;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .ac-new:hover { background: var(--teal-pale); }
+    footer{background:var(--surface);border-top:2px solid var(--teal);padding:28px 32px;transition:background .3s}
+    .foot-inner{max-width:1160px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--text-faint)}
+    .foot-brand{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-size:15px;color:var(--text)}
+    .foot-brand .dot{color:var(--teal)}
+    /* FAQ Page Minimal CSS */
+    .faq-list{display:flex;flex-direction:column;gap:8px}
+    .faq{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:border-color .2s}
+    .faq.open{border-color:var(--border2);box-shadow:var(--sh-sm)}
+    .faq-q{padding:18px 22px;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;gap:12px;transition:background .15s}
+    .faq-q:hover{background:var(--teal-pale)}
+    .faq.open .faq-q{background:var(--teal-pale);color:var(--teal)}
+    .faq-ico{width:22px;height:22px;flex-shrink:0;background:var(--teal-pale);border:1px solid var(--border2);border-radius:50%;display:grid;place-items:center;font-size:13px;color:var(--teal);transition:transform .25s,background .2s}
+    .faq.open .faq-ico{transform:rotate(45deg);background:var(--teal);color:white;border-color:var(--teal)}
+    .faq-a{display:none;padding:16px 22px;font-size:14px;color:var(--text-muted);line-height:1.75;border-top:1px solid var(--border)}
+    .faq.open .faq-a{display:block}
+    @media(max-width:860px){.scan-grid{grid-template-columns:1fr}.nav-inner{padding:0 16px}.wrap{padding:36px 16px 72px}}
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-brand" href="#">
+        <div class="nav-logo">🧠</div>
+        <span class="nav-name">Neura<span>Scan</span></span>
+      </a>
+      <div class="nav-tabs">
+        <button class="nav-tab active" onclick="gotoPage('scan',this)">🔬 Scan</button>
+        <button class="nav-tab" onclick="gotoPage('faq',this)">💬 FAQ</button>
+        <a class="nav-tab" href="dashboard.html">📊 Dashboard</a>
+      </div>
+      <div class="nav-right">
+        <span id="doctorGreeting" style="font-size:12px;color:var(--text-muted);font-family:var(--font-mono)"></span>
+        <button class="btn-signout" onclick="logout()">Sign Out</button>
+        <button class="btn-theme" id="themeBtn">🌙</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page active" id="page-scan">
+    <div class="wrap">
+      <div class="hero-block">
+        <div class="hero-tag">AI · ResNet50 · Multiclass Classification</div>
+        <h1 class="hero-title">Brain Stroke<br/><em>Detection System</em></h1>
+        <p class="hero-desc">Upload a brain scan image and our deep learning model will analyse it for stroke indicators — results in seconds.</p>
+      </div>
+      <div class="scan-grid">
+        <div>
+          <div class="glass-card">
+            <div class="card-top">
+              <div class="card-top-icon">📤</div>
+              <div>
+                <div class="card-top-title">Upload Brain Scan</div>
+                <div class="card-top-sub">CT scan recommended · JPEG, PNG, WebP · Max 10 MB</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="patient-form">
+                <div class="patient-form-title">Patient Information</div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Full Name *</label>
+                    <div class="autocomplete-wrap">
+                      <input class="form-input" id="patientName" type="text" placeholder="Type to search or enter new name…" autocomplete="off" />
+                      <div class="autocomplete-list" id="acList"></div>
+                    </div>
+                  </div>
+                  <div class="form-group"><label class="form-label">Age</label><input class="form-input" id="patientAge" type="number" placeholder="e.g. 45" min="0" max="120" /></div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group"><label class="form-label">Gender</label><select class="form-select" id="patientGender"><option value="">Select gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
+                  <div class="form-group"><label class="form-label">Contact</label><input class="form-input" id="patientContact" type="text" placeholder="Phone or email" /></div>
+                </div>
+                <div class="form-row single"><div class="form-group"><label class="form-label">Doctor Notes (optional)</label><input class="form-input" id="doctorNotes" type="text" placeholder="Initial observations..." /></div></div>
+                <button class="btn-register" id="btnRegister">Register Patient</button>
+                <div class="patient-saved" id="patientSaved">✓ <span id="patientSavedMsg">Patient registered</span></div>
+              </div>
+
+              <div class="drop-zone" id="dropZone">
+                <input type="file" id="fileIn" accept="image/jpeg,image/png,image/webp" />
+                <div class="drop-icon">🫁</div>
+                <div class="drop-title">Drop your scan here</div>
+                <div class="drop-sub">or <a>browse to upload</a></div>
+                <div class="fmt-row"><span class="fmt-chip">JPEG</span><span class="fmt-chip">PNG</span><span class="fmt-chip">WebP</span><span class="fmt-chip">≤ 10 MB</span></div>
+              </div>
+
+              <div class="preview-box" id="previewBox">
+                <div class="preview-img"><img id="prevImg" src="" alt="preview"/></div>
+                <div class="preview-info">
+                  <div class="preview-fname" id="prevName">—</div>
+                  <div class="preview-fmeta" id="prevMeta">—</div>
+                  <div class="checks">
+                    <div class="chk"><span class="chk-icon">✓</span> Image loaded</div>
+                    <div class="chk"><span class="chk-icon">✓</span> Format validated</div>
+                    <div class="chk"><span class="chk-icon">✓</span> Ready for analysis</div>
+                  </div>
+                  <button class="btn-rm" id="btnRm">✕ Remove</button>
+                </div>
+              </div>
+
+              <div class="warn-strip"><span>⚠</span><span>For <strong>research and educational use only.</strong> Not a substitute for professional medical diagnosis.</span></div>
+
+              <button class="btn-scan" id="btnScan" disabled>
+                <div class="spin"></div>
+                <span class="btn-txt">🔍  Analyse Brain Scan</span>
+              </button>
+
+              <div class="err-box" id="errBox"><span>⚠</span><span id="errMsg">An error occurred.</span></div>
+
+              <div class="res-card" id="resCard">
+                <div class="res-header">
+                  <div class="res-ico" id="resIco">🧠</div>
+                  <div><div class="res-verdict" id="resVerdict">—</div><div class="res-sub" id="resSub">—</div></div>
+                  <span class="res-badge" id="resBadge">—</span>
+                </div>
+                
+                <div class="res-metrics">
+                  <div class="m-cell"><span class="m-val" id="mConf">—</span><span class="m-lbl">Confidence</span></div>
+                  <div class="m-cell"><span class="m-val" id="mHem" style="color:var(--red)">—</span><span class="m-lbl">Hemorrhagic</span></div>
+                  <div class="m-cell"><span class="m-val" id="mIsch" style="color:var(--red)">—</span><span class="m-lbl">Ischemic</span></div>
+                  <div class="m-cell"><span class="m-val" id="mNormal" style="color:var(--green)">—</span><span class="m-lbl">Normal</span></div>
+                </div>
+                
+                <div class="res-bars">
+                  <div class="b-row"><span class="b-lbl">Hemorrhagic</span><div class="b-track"><div class="b-fill s" id="bH"></div></div><span class="b-pct" id="bHP">—</span></div>
+                  <div class="b-row"><span class="b-lbl">Ischemic</span><div class="b-track"><div class="b-fill s" id="bI"></div></div><span class="b-pct" id="bIP">—</span></div>
+                  <div class="b-row"><span class="b-lbl">Normal</span><div class="b-track"><div class="b-fill n" id="bN"></div></div><span class="b-pct" id="bNP">—</span></div>
+                </div>
+                
+                <div class="heatmap-section" id="heatmapSection">
+                  <div class="heatmap-title">Grad-CAM Activation Heatmap</div>
+                  <div id="heatmapContent" style="display:none">
+                    <div class="heatmap-grid">
+                      <div class="heatmap-img-wrap"><img id="origScanImg" src="" alt="Original scan"/><div class="heatmap-img-label">Original Scan</div></div>
+                      <div class="heatmap-img-wrap"><img id="heatmapImg" src="" alt="Grad-CAM"/><div class="heatmap-img-label">Grad-CAM Overlay</div></div>
+                    </div>
+                    <div style="margin-top:12px"><div class="heatmap-legend-bar"></div><div class="heatmap-legend-labels"><span>Low activation</span><span>High activation</span></div></div>
+                    <div class="heatmap-legend">🔬 <span><strong>How to read:</strong> Red/yellow = regions that influenced the decision most.</span></div>
+                  </div>
+                </div>
+
+                <div class="llm-insights-section" id="llmInsightsSection">
+                  <div class="heatmap-title">✨ AI Clinical Insights</div>
+                  <div id="llmInsightsContent" class="llm-content"></div>
+                </div>
+
+                <div class="pdf-section" id="pdfSection">
+                  <div style="font-size:12px;color:var(--text-muted)"><strong style="color:var(--text)">📄 Report Ready</strong><br/>PDF report generated.</div>
+                  <button onclick="downloadPdfReport()" style="display:flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,var(--teal),var(--teal-light));border:none;border-radius:var(--r);color:white;font-size:13px;font-weight:600;font-family:var(--font-body);cursor:pointer;box-shadow:0 2px 8px var(--teal-glow)">⬇ Download PDF</button>
+                </div>
+                <div class="stroke-warn">⚡ <strong>Abnormal findings detected.</strong> Seek immediate medical evaluation.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar">
+          <div class="s-card">
+            <div class="s-card-head">⚙️ Model Specifications</div>
+            <div class="s-card-body">
+              <div class="spec-row"><span class="spec-k">Architecture</span><span class="spec-v">ResNet50</span></div>
+              <div class="spec-row"><span class="spec-k">Input size</span><span class="spec-v">224 × 224</span></div>
+              <div class="spec-row"><span class="spec-k">Task</span><span class="spec-v">Multiclass (3-class)</span></div>
+              <div class="spec-row"><span class="spec-k">Classes</span><span class="spec-v">Hemorrhagic · Ischemic · Normal</span></div>
+              <div class="spec-row"><span class="spec-k">Preprocessing</span><span class="spec-v">Rescale ÷ 255</span></div>
+              <div class="spec-row"><span class="spec-k">Output layer</span><span class="spec-v">Softmax</span></div>
+            </div>
+          </div>
+          <div class="s-card">
+            <div class="s-card-head">📋 How to Use</div>
+            <div class="s-card-body">
+              <div class="steps">
+                <div class="step"><div class="step-n">1</div><span>Register patient with name and details</span></div>
+                <div class="step"><div class="step-n">2</div><span>Upload a brain CT scan image</span></div>
+                <div class="step"><div class="step-n">3</div><span>Click Analyse to run inference</span></div>
+                <div class="step"><div class="step-n">4</div><span>Download PDF and share with neurologist</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="s-card">
+            <div class="s-card-head">🛡️ Production Safeguards</div>
+            <div class="s-card-body">
+              <div class="guard-list">
+                <div class="guard"><span class="guard-ico">✓</span><span>Preprocessing matches training pipeline exactly</span></div>
+                <div class="guard"><span class="guard-ico">✓</span><span>File type and size validated on every request</span></div>
+                <div class="guard"><span class="guard-ico">✓</span><span>JWT authentication on all protected routes</span></div>
+                <div class="guard"><span class="guard-ico">✓</span><span>All errors returned as structured JSON</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-faq">
+    <div class="wrap">
+      <div class="hero-block">
+        <div class="hero-tag">Support</div>
+        <h1 class="hero-title">Frequently Asked<br/><em>Questions</em></h1>
+      </div>
+      <div class="faq-list">
+        <div class="faq"><div class="faq-q" onclick="toggleFaq(this)"><span>Can I use NeuraScan for clinical diagnosis?</span><span class="faq-ico">+</span></div><div class="faq-a">No. NeuraScan is for research and educational use only. Always seek professional medical evaluation.</div></div>
+        <div class="faq"><div class="faq-q" onclick="toggleFaq(this)"><span>Why is the threshold 0.35 and not 0.5?</span><span class="faq-ico">+</span></div><div class="faq-a">In medical screening, missing a real stroke (false negative) is far more dangerous than a false positive. The lower threshold prioritises sensitivity — catching more potential strokes at the cost of some specificity.</div></div>
+        <div class="faq"><div class="faq-q" onclick="toggleFaq(this)"><span>Is my scan stored anywhere?</span><span class="faq-ico">+</span></div><div class="faq-a">Scans are saved to the backend server to generate heatmaps and PDF reports. They are not shared with any third party. Only authorised doctors with a valid account can access prediction records.</div></div>
+        <div class="faq"><div class="faq-q" onclick="toggleFaq(this)"><span>The API returns 503 — what do I do?</span><span class="faq-ico">+</span></div><div class="faq-a">A 503 means the model weights file hasn't loaded. Place model_weights.npy in backend/models/ and restart the server. Look for "✅ Model loaded successfully" in the terminal.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="foot-inner">
+      <div class="foot-brand">NeuraScan <span class="dot">·</span> AI Brain Stroke Detection</div>
+      <span>FastAPI · TensorFlow · ResNet50</span>
+      <span>⚕ Research use only · v5.0.0</span>
+    </div>
+  </footer>
+
+  <script>
+    const API_BASE = 'http://localhost:8000';
+
+    // ── Auth ────────────────────────────
+    const token = localStorage.getItem('ns-token');
+    if (!token) { window.location.href = 'login.html'; }
+    const doctorName = localStorage.getItem('ns-doctor') || 'Doctor';
+
+    function authFetch(url, opts = {}) {
+      opts.headers = { ...(opts.headers || {}), 'Authorization': 'Bearer ' + token };
+      return fetch(url, opts);
+    }
+
+    function logout() {
+      localStorage.removeItem('ns-token');
+      localStorage.removeItem('ns-doctor');
+      localStorage.removeItem('ns-email');
+      window.location.href = 'login.html';
+    }
+
+    // ── Global helpers ─────────────────────
+    function gotoPage(id, btn) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+      document.getElementById('page-' + id).classList.add('active');
+      btn.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function toggleFaq(el) { el.parentElement.classList.toggle('open'); }
+
+    // ── Fixed Patient Auto-Fill (Async to get Age, Gender, Contact) ──
+    async function selectPatient(id, name) {
+      currentPatientId = id;
+      document.getElementById('patientName').value = name;
+      document.getElementById('acList').classList.remove('show');
+      
+      // Fetch full patient details to populate the rest of the form
+      try {
+        const res = await authFetch(`${API_BASE}/patients/${id}`);
+        if (res.ok) {
+          const p = await res.json();
+          if (p.age) document.getElementById('patientAge').value = p.age;
+          if (p.gender) document.getElementById('patientGender').value = p.gender;
+          if (p.contact) document.getElementById('patientContact').value = p.contact;
+        }
+      } catch (e) {
+        console.error("Failed to load patient details", e);
+      }
+
+      document.getElementById('patientSavedMsg').textContent = `Using existing patient: "${name}" (ID: ${id})`;
+      document.getElementById('patientSaved').classList.add('show');
+      const btn = document.getElementById('btnRegister');
+      btn.textContent = '✓ Patient Selected';
+      btn.style.cssText = 'background:var(--teal-pale);color:var(--teal);border-color:var(--teal)';
+    }
+
+    // ── PDF download ─────────────────────────
+    let _pdfUrl = null;
+    async function downloadPdfReport() {
+      if (!_pdfUrl) return;
+      try {
+        const res = await authFetch(API_BASE + _pdfUrl);
+        if (res.status === 401) { window.location.href = 'login.html'; return; }
+        if (!res.ok) { alert('PDF download failed: ' + res.status); return; }
+        const blob = await res.blob();
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href = url; a.download = 'NeuraScan_Report.pdf';
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
+      } catch (e) { alert('Download failed: ' + e.message); }
+    }
+
+    // ── Patient registration ────────
+    let currentPatientId = null;
+
+    // ── DOM-dependent code ────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      const greet = document.getElementById('doctorGreeting');
+      if (greet) greet.textContent = '👤 ' + doctorName;
+
+      const themeBtn = document.getElementById('themeBtn');
+      if (localStorage.getItem('ns-theme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeBtn.textContent = '☀️';
+      }
+      themeBtn.addEventListener('click', () => {
+        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        document.documentElement[dark ? 'removeAttribute' : 'setAttribute']('data-theme', 'dark');
+        themeBtn.textContent = dark ? '🌙' : '☀️';
+        localStorage.setItem('ns-theme', dark ? 'light' : 'dark');
+      });
+
+      // Patient name autocomplete
+      const patientNameInput = document.getElementById('patientName');
+      const acList = document.getElementById('acList');
+      let acTimer;
+
+      patientNameInput.addEventListener('input', () => {
+        clearTimeout(acTimer);
+        const q = patientNameInput.value.trim();
+        if (q.length < 2) { acList.classList.remove('show'); return; }
+        acTimer = setTimeout(async () => {
+          try {
+            const res = await authFetch(`${API_BASE}/patients/search?name=${encodeURIComponent(q)}`);
+            if (!res.ok) return;
+            const patients = await res.json();
+            if (!patients.length) { acList.classList.remove('show'); return; }
+
+            acList.innerHTML = patients.map(p => `
+              <div class="ac-item" onclick="selectPatient(${p.id}, '${p.name.replace(/'/g,"\'")}')">
+                <span>${p.name}${p.age ? ' · ' + p.age + ' yrs' : ''}${p.gender ? ' · ' + p.gender : ''}</span>
+                <span class="ac-item-id">ID: ${p.id}</span>
+              </div>
+            `).join('') + `<div class="ac-new" onclick="acList.classList.remove('show')">+ Register as new patient</div>`;
+            acList.classList.add('show');
+          } catch {}
+        }, 300);
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.autocomplete-wrap')) {
+          acList.classList.remove('show');
+        }
+      });
+
+      document.getElementById('btnRegister').addEventListener('click', async () => {
+        const name = document.getElementById('patientName').value.trim();
+        if (!name) { alert('Please enter patient name.'); return; }
+        const body = {
+          name,
+          age:     parseInt(document.getElementById('patientAge').value) || null,
+          gender:  document.getElementById('patientGender').value || null,
+          contact: document.getElementById('patientContact').value.trim() || null,
+        };
+        try {
+          const res  = await authFetch(API_BASE + '/patients', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+          const data = await res.json();
+          if (!res.ok) { alert('Error: ' + (data.detail || 'Registration failed')); return; }
+          currentPatientId = data.id;
+          document.getElementById('patientSavedMsg').textContent = `"${data.name}" registered (ID: ${data.id}) — now upload scan`;
+          document.getElementById('patientSaved').classList.add('show');
+          const btn = document.getElementById('btnRegister');
+          btn.textContent = '✓ Registered';
+          btn.style.cssText = 'background:var(--green-pale);color:var(--green);border-color:var(--green)';
+        } catch (e) { alert('API error: ' + e.message); }
+      });
+
+      // Upload
+      const dropZone = document.getElementById('dropZone');
+      const fileIn   = document.getElementById('fileIn');
+      const prevBox  = document.getElementById('previewBox');
+      const prevImg  = document.getElementById('prevImg');
+      const prevName = document.getElementById('prevName');
+      const prevMeta = document.getElementById('prevMeta');
+      const btnRm    = document.getElementById('btnRm');
+      const btnScan  = document.getElementById('btnScan');
+      const errBox   = document.getElementById('errBox');
+      const errMsg   = document.getElementById('errMsg');
+      const resCard  = document.getElementById('resCard');
+      let file = null;
+
+      dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+      dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('over'); if (e.dataTransfer.files[0]) load(e.dataTransfer.files[0]); });
+      fileIn.addEventListener('change', e => { if (e.target.files[0]) load(e.target.files[0]); });
+
+      function load(f) {
+        file = f;
+        const r = new FileReader();
+        r.onload = ev => {
+          prevImg.src = ev.target.result;
+          prevName.textContent = f.name;
+          prevMeta.textContent = (f.size/1024).toFixed(1) + ' KB · ' + f.type;
+          prevBox.classList.add('show');
+          dropZone.style.display = 'none';
+          btnScan.disabled = false;
+          hideErr(); hideRes();
+        };
+        r.readAsDataURL(f);
+      }
+
+      btnRm.addEventListener('click', () => {
+        file = null; fileIn.value = '';
+        prevBox.classList.remove('show');
+        dropZone.style.display = '';
+        btnScan.disabled = true;
+        hideErr(); hideRes();
+      });
+
+      btnScan.addEventListener('click', async () => {
+        if (!file) return;
+        if (!currentPatientId) { alert('Please register the patient first.'); return; }
+        setLoad(true); hideErr(); hideRes();
+        const form = new FormData();
+        form.append('file', file);
+        form.append('patient_id', currentPatientId);
+        form.append('doctor_notes', document.getElementById('doctorNotes').value.trim());
+        try {
+          const res = await authFetch(API_BASE + '/predictions', { method: 'POST', body: form });
+          const d   = await res.json();
+          if (!res.ok) { showErr(d.detail || 'Server error ' + res.status); return; }
+          showRes(d);
+        } catch (e) { showErr('Cannot reach API: ' + e.message); }
+        finally { setLoad(false); }
+      });
+
+      // ── Fixed showRes (Proper mapping for 3-class data) ──
+      function showRes(d) {
+        resCard.className = 'res-card show ' + (d.is_stroke ? 'stroke' : 'normal');
+        document.getElementById('resIco').textContent    = d.is_stroke ? '⚠' : '✓';
+        document.getElementById('resVerdict').textContent = d.prediction;
+        const msg = d.patient_name ? ` · ${d.patient_name} · #${d.prediction_id}` : '';
+        
+        document.getElementById('resSub').textContent    = d.is_stroke
+          ? `Type: ${d.stroke_type} · Risk: ${d.risk_level}${msg}`
+          : `Confidence: ${d.confidence}% · No stroke indicators found${msg}`;
+          
+        document.getElementById('resBadge').textContent  = d.risk_level + ' Risk';
+        const col = d.is_stroke ? 'var(--red)' : 'var(--green)';
+        
+        // 4 Columns
+        document.getElementById('mConf').textContent     = d.confidence + '%';
+        document.getElementById('mConf').style.color     = col;
+        document.getElementById('mHem').textContent      = (d.hemorrhagic_prob || 0) + '%';
+        document.getElementById('mIsch').textContent     = (d.ischemic_prob || 0) + '%';
+        document.getElementById('mNormal').textContent   = (d.normal_prob || 0) + '%';
+        
+        // 3 Bars
+        document.getElementById('bHP').textContent       = (d.hemorrhagic_prob || 0) + '%';
+        document.getElementById('bIP').textContent       = (d.ischemic_prob || 0) + '%';
+        document.getElementById('bNP').textContent       = (d.normal_prob || 0) + '%';
+        
+        document.getElementById('bH').style.width = '0';
+        document.getElementById('bI').style.width = '0';
+        document.getElementById('bN').style.width = '0';
+        
+        setTimeout(() => {
+          document.getElementById('bH').style.width = (d.hemorrhagic_prob || 0) + '%';
+          document.getElementById('bI').style.width = (d.ischemic_prob || 0) + '%';
+          document.getElementById('bN').style.width = (d.normal_prob || 0) + '%';
+        }, 120);
+        
+        // Heatmap
+        const hs = document.getElementById('heatmapSection');
+        const hc = document.getElementById('heatmapContent');
+        if (d.heatmap_base64) {
+          hs.classList.add('show');
+          hc.style.display = 'block';
+          document.getElementById('origScanImg').src = prevImg.src;
+          document.getElementById('heatmapImg').src  = 'data:image/png;base64,' + d.heatmap_base64;
+        } else { hs.classList.remove('show'); }
+
+        // LLM Insights
+        const llmSec = document.getElementById('llmInsightsSection');
+        const llmContent = document.getElementById('llmInsightsContent');
+        if (d.clinical_insights_html) {
+          llmContent.innerHTML = d.clinical_insights_html;
+          llmSec.classList.add('show');
+        } else {
+          llmSec.classList.remove('show');
+          llmContent.innerHTML = '';
+        }
+
+        // PDF
+        const ps = document.getElementById('pdfSection');
+        if (d.pdf_url) { _pdfUrl = d.pdf_url; ps.style.display = 'flex'; }
+        else { _pdfUrl = null; ps.style.display = 'none'; }
+        resCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      function hideRes() {
+        resCard.className = 'res-card'; _pdfUrl = null;
+        
+        const hs = document.getElementById('heatmapSection');
+        if (hs) hs.classList.remove('show');
+        
+        const llmSec = document.getElementById('llmInsightsSection');
+        if (llmSec) llmSec.classList.remove('show');
+
+        const ps = document.getElementById('pdfSection');
+        if (ps) ps.style.display = 'none';
+      }
+      
+      function showErr(m) { errMsg.textContent = m; errBox.classList.add('show'); }
+      function hideErr() { errBox.classList.remove('show'); }
+      function setLoad(on) { btnScan.classList.toggle('loading', on); btnScan.disabled = on; }
+    });
+  </script>
+</body>
+</html>

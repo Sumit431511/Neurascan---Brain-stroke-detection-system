@@ -148,7 +148,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 | Fine-tuned layers | Last 50 layers |
 | Input | 224 × 224 × 3 RGB |
 | Preprocessing | ResNet50 `preprocess_input` |
-| Output | Sigmoid [0–1] |
+| Output | Multi-Class(3 classes) |
 | Threshold | 0.35 (tuned for recall) |
 | Grad-CAM layer | `conv5_block3_out` |
 

@@ -111,11 +111,12 @@ async def predict(
                     gradcam_image_path=heatmap_path
                 )
             except Exception as e:
-                logger.warning("LLM generation failed (non-fatal): %s", e)
+                logger.error("LLM generation failed: %s", e)
+                raise HTTPException(status_code=500, detail=f"LLM generation failed: {e}")
 
         except Exception as e:
-            logger.warning("Grad-CAM failed (non-fatal): %s", e)
-
+            logger.error("Grad-CAM failed: %s", e)
+            raise HTTPException(status_code=500, detail=f"Grad-CAM failed: {e}")
    # =================================================================
     # NEW: Auto-Draft PDF Notes using AI Insights
     # =================================================================

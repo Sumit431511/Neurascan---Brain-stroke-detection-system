@@ -43,6 +43,7 @@ async def predict(
     Upload a brain scan and get 3-class stroke prediction.
     Returns: Hemorrhagic / Ischemic / Normal
     Optimized: PDF generation is now deferred until the user clicks Download.
+    Handles 404, 415, 413, 400, 422, and 500 HTTP errors as specified.
     """
     # Validate patient
     patient = crud.get_patient(db, patient_id)
